@@ -13,6 +13,7 @@ import PyQt4.Qwt5 as Qwt
 import numpy as np
 from Adsapi import *
 
+
 class Chart(Qwt.QwtPlot):
     def __init__(self, *args):
         super(Chart, self).__init__(*args)
@@ -40,13 +41,9 @@ class Chart(Qwt.QwtPlot):
         self.setAxisScale(Qwt.QwtPlot.yLeft, -10.0, 10.0)
 
         # insert a few curves
-        self.curveA = Qwt.QwtPlotCurve(u'curveA')
-        self.curveA.setPen(Qt.QPen(Qt.Qt.red))
-        self.curveA.attach(self)
-
-        self.curveB = Qwt.QwtPlotCurve(u'curveB')
-        self.curveB.setPen(Qt.QPen(Qt.Qt.blue))
-        self.curveB.attach(self)
+        self.curve = Qwt.QwtPlotCurve(u'curveA')
+        self.curve.setPen(Qt.QPen(Qt.Qt.red))
+        self.curve.attach(self)
 
         # insert a horizontal marker at y = xxx
         mY = Qwt.QwtPlotMarker()
@@ -69,24 +66,18 @@ class Chart(Qwt.QwtPlot):
         # Initialize data
         self.x = np.arange(0.0, 10001.0, 1.0)
         self.curveAData = np.zeros(len(self.x), np.float)
-        self.curveBData = np.zeros(len(self.x), np.float)
 
-        
-    def setData(self, AData, BData):
-        self.curveA.setData(self.x, AData)
-        self.curveB.setData(self.x, BData)
+    def setData(self, AData):
+        self.curve.setData(self.x, AData)
         self.replot()
 
-    def appendData(self, AData, BData):
+    def appendData(self, AData):
         self.curveAData = np.concatenate((self.curveAData[len(AData):], AData), 1)
-        self.curveBData = np.concatenate((self.curveBData[len(BData):], BData), 1)
         self.curveA.setData(self.x, self.curveAData)
-        self.curveB.setData(self.x, self.curveBData)
         self.replot()
 
     def clear(self):
         self.curveA.setData(self.x, [])
-        self.curveB.setData(self.x, [])
         self.replot()
 
     
@@ -114,8 +105,20 @@ class MainWindow(QtGui.QWidget):
 
         self.setLayout(mainLayout)
 
-        self.active = False
+        self.isActive = False
 
+    def start(self):
+        deviceNum = 0
+        self.count = 100
+        # Open device
+        self.DriverHandle = DRV_DeviceOpen(deviceNum)
+        # Allocate INT & data buffer for interrupt transfer
+        self.usINTBuf, self.pUserBuf = AllocateDataBuffer(self.count)
+        # Start interrupt transfer
+        DRV_FAIIntStart(self.DriverHandle, 1000, 0, 4, self.count, self.usINTBuf, TrigSrc=0, cyclic=1, IntrCount=1)
+
+        self.timerId = self.startTimer(10)
+        self.isActive = True
 
     def acquise(self):
         FAICheck = DRV_FAICheck(self.DriverHandle)
@@ -130,21 +133,8 @@ class MainWindow(QtGui.QWidget):
             data = GetBufferData(self.pUserBuf, self.count)
         return data
 
-    def start(self):
-        DeviceNum = 0
-        self.count = 100
-        # Open device
-        self.DriverHandle = DRV_DeviceOpen(DeviceNum)
-        # Allocate INT & data buffer for interrupt transfer
-        self.usINTBuf, self.pUserBuf = AllocateDataBuffer(self.count)
-        # Start interrupt transfer
-        DRV_FAIIntStart(self.DriverHandle, 1000, 0, 4, self.count, self.usINTBuf, TrigSrc=0, cyclic=1, IntrCount=1)
-
-        self.timerId = self.startTimer(10)
-        self.active = True
-
     def stop(self):
-        if self.active == True:
+        if self.isActive == True:
             DRV_FAIStop(self.DriverHandle)
             self.killTimer(self.timerId)
             self.active = False
