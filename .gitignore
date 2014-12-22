@@ -1,7 +1,13 @@
 *.py[cod]
 
+# PyCharm
+# http://www.jetbrains.com/pycharm/webhelp/project.html
+.idea
+.iml
+
 # C extensions
 *.so
+*.dll
 
 # Packages
 *.egg
