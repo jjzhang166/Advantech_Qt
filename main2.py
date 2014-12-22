@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__autor__ = 'baixue'
+__author__ = 'baixue'
 
 '''
 单线程
@@ -16,17 +16,17 @@ from Adsapi import *
 class Chart(Qwt.QwtPlot):
     def __init__(self, *args):
         super(Chart, self).__init__(*args)
-        #set title
+        # set title
         self.setTitle(u'<h4><font color=red>图表</font></h4>')
-        #背景色
+        # 背景色
         self.setCanvasBackground(Qt.Qt.white)
-        #插入图例--曲线名
+        # 插入图例--曲线名
         self.insertLegend(Qwt.QwtLegend(), Qwt.QwtPlot.RightLegend)
 
         # a variation on the C++ example
         self.plotLayout().setAlignCanvasToScales(True)
         
-        #创建网格
+        # 创建网格
         grid = Qwt.QwtPlotGrid()
         grid.attach(self)
         grid.setPen(Qt.QPen(Qt.Qt.gray, 0, Qt.Qt.DotLine))
@@ -66,8 +66,7 @@ class Chart(Qwt.QwtPlot):
         mX.setLinePen(Qt.QPen(Qt.Qt.green, 1, Qt.Qt.DashDotLine))
         mX.attach(self)
 
-
-        #Initialize data
+        # Initialize data
         self.x = np.arange(0.0, 10001.0, 1.0)
         self.curveAData = np.zeros(len(self.x), np.float)
         self.curveBData = np.zeros(len(self.x), np.float)
@@ -126,7 +125,7 @@ class MainWindow(QtGui.QWidget):
         if halfReady == 0:
             return None
         else:
-            #Get data from driver
+            # Get data from driver
             overrun = DRV_FAITransfer(self.DriverHandle, self.pUserBuf, self.count)
             data = GetBufferData(self.pUserBuf, self.count)
         return data
@@ -134,11 +133,11 @@ class MainWindow(QtGui.QWidget):
     def start(self):
         DeviceNum = 0
         self.count = 100
-        #Open device
+        # Open device
         self.DriverHandle = DRV_DeviceOpen(DeviceNum)
-        #Allocate INT & data buffer for interrupt transfer
+        # Allocate INT & data buffer for interrupt transfer
         self.usINTBuf, self.pUserBuf = AllocateDataBuffer(self.count)
-        #Start interrupt transfer
+        # Start interrupt transfer
         DRV_FAIIntStart(self.DriverHandle, 1000, 0, 4, self.count, self.usINTBuf, TrigSrc=0, cyclic=1, IntrCount=1)
 
         self.timerId = self.startTimer(10)

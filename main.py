@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__autor__ = 'baixue'
+__author__ = 'baixue'
 
 '''
-单线程
+多线程
 '''
 
 import math
