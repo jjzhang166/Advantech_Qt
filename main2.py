@@ -72,7 +72,7 @@ class Chart(Qwt.QwtPlot):
         self.replot()
 
     def appendData(self, data):
-        self.curveData = np.append(self.curveData, data)
+        self.curveData = np.append(self.curveData[len(data):], data)
         self.curve.setData(self.x, self.curveData)
         self.replot()
 
@@ -105,7 +105,7 @@ class MainWindow(QtGui.QWidget):
 
         self.setLayout(mainLayout)
 
-        self.isActive = False
+        self.timerActive = False
 
     def start(self):
         deviceNum = 0
@@ -123,7 +123,7 @@ class MainWindow(QtGui.QWidget):
             print e
         else:
             self.timerId = self.startTimer(10)
-            self.isActive = True
+            self.timerActive = True
 
     def acquise(self):
         FAICheck = DRV_FAICheck(self.DriverHandle)
@@ -139,17 +139,17 @@ class MainWindow(QtGui.QWidget):
         return data
 
     def stop(self):
-        if self.isActive == True:
+        if self.timerActive == True:
             DRV_FAIStop(self.DriverHandle)
             self.killTimer(self.timerId)
-            self.active = False
+            self.timeractive = False
         
     def timerEvent(self, e):
         data = self.acquise()
         if data == None:
             return None
         else:
-            self.chart.append(data)
+            self.chart.appendData(data)
         
     def closeEvent(self, event):
         self.stop()
