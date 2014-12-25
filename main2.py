@@ -41,7 +41,7 @@ class Chart(Qwt.QwtPlot):
         self.setAxisScale(Qwt.QwtPlot.yLeft, -10.0, 10.0)
 
         # insert a few curves
-        self.curve = Qwt.QwtPlotCurve(u'curveA')
+        self.curve = Qwt.QwtPlotCurve(u'curve')
         self.curve.setPen(Qt.QPen(Qt.Qt.red))
         self.curve.attach(self)
 
@@ -65,19 +65,19 @@ class Chart(Qwt.QwtPlot):
 
         # Initialize data
         self.x = np.arange(0.0, 10001.0, 1.0)
-        self.curveAData = np.zeros(len(self.x), np.float)
+        self.curveData = np.zeros(len(self.x), np.float)
 
-    def setData(self, AData):
-        self.curve.setData(self.x, AData)
+    def setData(self, data):
+        self.curve.setData(self.x, data)
         self.replot()
 
-    def appendData(self, AData):
-        self.curveAData = np.concatenate((self.curveAData[len(AData):], AData), 1)
-        self.curveA.setData(self.x, self.curveAData)
+    def appendData(self, data):
+        self.curveData = np.append(self.curveData, data)
+        self.curve.setData(self.x, self.curveData)
         self.replot()
 
     def clear(self):
-        self.curveA.setData(self.x, [])
+        self.curve.setData(self.x, [])
         self.replot()
 
     
@@ -110,15 +110,20 @@ class MainWindow(QtGui.QWidget):
     def start(self):
         deviceNum = 0
         self.count = 100
-        # Open device
-        self.DriverHandle = DRV_DeviceOpen(deviceNum)
-        # Allocate INT & data buffer for interrupt transfer
-        self.usINTBuf, self.pUserBuf = AllocateDataBuffer(self.count)
-        # Start interrupt transfer
-        DRV_FAIIntStart(self.DriverHandle, 1000, 0, 4, self.count, self.usINTBuf, TrigSrc=0, cyclic=1, IntrCount=1)
-
-        self.timerId = self.startTimer(10)
-        self.isActive = True
+        try:
+            # Open device
+            self.DriverHandle = DRV_DeviceOpen(deviceNum)
+            # Allocate INT & data buffer for interrupt transfer
+            self.usINTBuf, self.pUserBuf = AllocateDataBuffer(self.count)
+            # Start interrupt transfer
+            DRV_FAIIntStart(self.DriverHandle, 1000, 0, 4, self.count, self.usINTBuf, TrigSrc=0, cyclic=1, IntrCount=1)
+        except Ads_Error, e:
+            print e
+        except Exception, e:
+            print e
+        else:
+            self.timerId = self.startTimer(10)
+            self.isActive = True
 
     def acquise(self):
         FAICheck = DRV_FAICheck(self.DriverHandle)
