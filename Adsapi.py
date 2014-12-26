@@ -284,7 +284,7 @@ def GetBufferData(UserBuf, count):
     return [UserBuf[i] for i in range(count)]
 
 
-def WaitFAIEvent(DriverHandle, timeout):
+def WaitFAIEvent(DriverHandle, timeout=3000):
     eventType = DRV_CheckEvent(DriverHandle, timeout)
     if eventType > 10240:
         #AO

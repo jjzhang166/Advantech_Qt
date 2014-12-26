@@ -13,6 +13,7 @@ class Worker(threading.Thread):
         self.name=name
         self.func=func
         self.args=args
+        self.daemon = True
 
     def getResult(self):
         return self.res

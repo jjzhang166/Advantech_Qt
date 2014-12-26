@@ -143,6 +143,7 @@ class MainWindow(QtGui.QWidget):
             DRV_FAIStop(self.DriverHandle)
             self.killTimer(self.timerId)
             self.timeractive = False
+            DRV_DeviceClose(self.DriverHandle)
         
     def timerEvent(self, e):
         data = self.acquise()

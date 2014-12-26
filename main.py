@@ -96,7 +96,7 @@ class MainWindow(QtGui.QWidget):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setWindowIcon(Qt.QIcon(":/images/images/logo.png"))
-        self.setWindowOpacity(1.0)
+        #self.setWindowOpacity(1.0) # 透明度
         self.setMinimumSize(800,600)
         
         self.chart = Chart()
@@ -115,43 +115,50 @@ class MainWindow(QtGui.QWidget):
         mainLayout.addLayout(self.layout)
 
         self.setLayout(mainLayout)
-        
+
         self.task_DAQ = Worker(self.acquise, 'DAQ')
 
     def acquise(self):
         while True:
-            FAIEvent = WaitFAIEvent(DriverHandle, timeout)
+            FAIEvent = WaitFAIEvent(self.DriverHandle, timeout=3000)
             AI_Terminated = FAIEvent[0]
             if AI_Terminated == True:break
-            AI_BufferHalfReady = FAIEvent[1]
-            AI_BufferFullReady = FAIEvent[2]
+            AI_BufferHalfReady, AI_BufferFullReady = FAIEvent[1:3]
             if AI_BufferHalfReady | AI_BufferFullReady:
-                overRun = DRV_FAITransfer(DriverHandle, pUserBuf, count, start=0, DataType=1)
+                overRun = DRV_FAITransfer(self.DriverHandle, self.pUserBuf, self.count, start=0, DataType=1)
             if overRun != 0:
-                DRV_ClearOverrun(DriverHandle)
-                data = GetBufferData(pUserBuf, count)
+                DRV_ClearOverrun(self.DriverHandle)
+            data = GetBufferData(self.pUserBuf, self.count)
+            self.update_chart(data)
 
-    def start(self, interval):
-        DeviceNum = 0
-        count = 100
-        #Open device
-        DriverHandle = DRV_DeviceOpen(DeviceNum)
-        #Enable event
-        DRV_EnableEvent(DriverHandle, EventType=0xf, Enabled=1, Count=512)
-        #Allocate INT & data buffer for interrupt transfer
-        usINTBuf, pUserBuf = AllocateDataBuffer(count)
-        #Start interrupt transfer
-        DRV_FAIIntStart(DriverHandle, 1000, 0, 4, count, usINTBuf, TrigSrc=0, cyclic=0, IntrCount=1)
-        self.task_DAQ.start()
+    def update_chart(self, data):
+        self.chart.appendData(data)
+
+    def start(self):
+        deviceNum = 0
+        self.count = 100
+        try:
+            # Open device
+            self.DriverHandle = DRV_DeviceOpen(deviceNum)
+            # Allocate INT & data buffer for interrupt transfer
+            self.usINTBuf, self.pUserBuf = AllocateDataBuffer(self.count)
+            # Start interrupt transfer
+            DRV_FAIIntStart(self.DriverHandle, 1000, 0, 4, self.count, self.usINTBuf, TrigSrc=0, cyclic=1, IntrCount=1)
+        except Ads_Error, e:
+            print e
+        except Exception, e:
+            print e
+        else:
+            self.task_DAQ.start()
 
     def stop(self):
-        self.tash_DAQ.join()
-        DRV_FAIStop(self.DriverHandle)
-        
-    def timerEvent(self, e):
-        pass
+        if self.task_DAQ.is_alive():
+            DRV_FAIStop(self.DriverHandle)
+            self.tash_DAQ.join()
+            DRV_DeviceClose(self.DriverHandle)
         
     def closeEvent(self, event):
+        self.stop()
         self.close()
 
 
