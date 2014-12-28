@@ -3,7 +3,8 @@
 
 __author__ = 'baixue'
 
-title_bgcolor = "#420040"
+
+title_bg_color = "#420040"
 title_content = u"<font color=white size=10 face='微软雅黑'><b>\n\nVISUAL INSPECTION INSTRUMENT V0.1</b></font>"
 
 

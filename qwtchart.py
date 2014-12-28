@@ -3,6 +3,7 @@
 
 __author__ = 'baixue'
 
+import math
 from PyQt4 import Qt
 import PyQt4.Qwt5 as Qwt
 import numpy as np
@@ -10,7 +11,7 @@ import numpy as np
 
 class QwtChart(Qwt.QwtPlot):
     def __init__(self, *args):
-        super(QwtPlot, self).__init__(*args)
+        super(QwtChart, self).__init__(*args)
         #set title
         self.setTitle(u'<h4><font color=red>图表</font></h4>')
         #背景色
@@ -20,10 +21,11 @@ class QwtChart(Qwt.QwtPlot):
 
         # a variation on the C++ example
         self.plotLayout().setAlignCanvasToScales(True)
-        #创建网格
+
+        # create grid
         grid = Qwt.QwtPlotGrid()
-        grid.attach(self)
         grid.setPen(Qt.QPen(Qt.Qt.gray, 0, Qt.Qt.DotLine))
+        grid.attach(self)
         
         # set axis titles
         self.setAxisTitle(Qwt.QwtPlot.xBottom, u'Time(s)')
@@ -60,8 +62,8 @@ class QwtChart(Qwt.QwtPlot):
 
         #Initialize data
         self.x = np.arange(0.0, 101.0, 1.0)
-        self.curveAData = np.array
-        self.curveBData = np.array
+        self.curveAData = np.zeros(100, np.float)
+        self.curveBData = np.zeros(100, np.float)
 
     def setData(self, AData, BData):
         self.curveA.setData(self.x, AData)

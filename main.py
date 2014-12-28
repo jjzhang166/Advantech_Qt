@@ -12,6 +12,7 @@ from PyQt4 import QtCore, QtGui, Qt
 import PyQt4.Qwt5 as Qwt
 import numpy as np
 from LoadThread import Worker
+from Adsapi import *
 
 
 class Chart(Qwt.QwtPlot):
@@ -154,7 +155,7 @@ class MainWindow(QtGui.QWidget):
     def stop(self):
         if self.task_DAQ.is_alive():
             DRV_FAIStop(self.DriverHandle)
-            self.tash_DAQ.join()
+            self.task_DAQ.join()
             DRV_DeviceClose(self.DriverHandle)
         
     def closeEvent(self, event):

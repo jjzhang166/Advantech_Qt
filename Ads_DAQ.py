@@ -8,18 +8,18 @@ __author__ = 'baixue'
 
 from PyQt4 import QtCore
 from Adsapi import *
-#QtCore.pyqtSignal()
 
 
 class DAQ_Task( QtCore.QThread):
     def __init__(self, parent=None):
         #QThread.__init__(self, parent)
         super(DAQ_Task, self).__init__(self, parent)
-        self.Driverhandle = 0
+        self.DriverHandle = 0
         self.usINTBuf = None # int buffer
         self.pUserBuf = None # user buffer
         self.count = 200
         self.working = True
+        #signalName = QtCore.pyqtSignal()
 
     def __del__(self):
         self.working = False
@@ -31,7 +31,7 @@ class DAQ_Task( QtCore.QThread):
             # Open device
             self.DriverHandle = DRV_DeviceOpen(DeviceNum)
             # Enable event
-            DRV_EnableEvent(DriverHandle, EventType=0xf, Enabled=1, Count=512)
+            DRV_EnableEvent(self.DriverHandle, EventType=0xf, Enabled=1, Count=512)
         except Ads_Error, e:
             self.quit()
         else:

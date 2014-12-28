@@ -11,7 +11,7 @@ import sys
 
 fname = '%s.py' % raw_input("FileName:")
 
-#文件是否已经存在
+# warning if existant
 if os.path.exists(fname):
     print "ERROR: '%s' already exists" % fname
     sys.exit()
