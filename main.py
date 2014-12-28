@@ -97,7 +97,7 @@ class MainWindow(QtGui.QWidget):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setWindowIcon(Qt.QIcon(":/images/images/logo.png"))
-        #self.setWindowOpacity(1.0) # 透明度
+        # self.setWindowOpacity(1.0) # 透明度
         self.setMinimumSize(800,600)
         
         self.chart = Chart()
