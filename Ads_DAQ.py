@@ -11,58 +11,43 @@ from Adsapi import *
 
 
 class DAQ_Task( QtCore.QThread):
+    signal_DAQ = QtCore.pyqtSignal(list)
     def __init__(self, parent=None):
         #QThread.__init__(self, parent)
         super(DAQ_Task, self).__init__(self, parent)
         self.DriverHandle = 0
-        self.usINTBuf = None # uint buffer
-        self.pUserBuf = None # user buffer
-        self.count = 200
-        self.working = True
-        #signalName = QtCore.pyqtSignal()
+        self.working = False
 
     def __del__(self):
         self.working = False
         self.wait()
 
-    def start(self, DeviceNum=0, sampleRate=1000, startChan=0, numChans=2, gains=None, count=200):
-        self.count = count
+    def start(self, DeviceNum=0, startChan=0, numChan=2, gains=None):
+        self.startChan = startChan
+        self.numChan = numChan
+        self.gains = gains
         try:
             # Open device
             self.DriverHandle = DRV_DeviceOpen(DeviceNum)
-            # Enable event
-            DRV_EnableEvent(self.DriverHandle, EventType=0xf, Enabled=1, Count=512)
+            DRV_MAIConfig(self.DriverHandle, numChan, startChan, gains)
         except Ads_Error, e:
             self.quit()
         else:
-            # Allocate INT & data buffer for interrupt transfer
-            self.usINTBuf, self.pUserBuf = AllocateDataBuffer(count)
-            # Start interrupt transfer
-            DRV_FAIIntScanStart(self.DriverHandle, sampleRate, numChans, startChan, count, self.usINTBuf, gains, cyclic=1)
+            self.working = True
 
     def run(self):
-        while True:
-            FAIEvent = WaitFAIEvent(self.DriverHandle, timeout=3000)
-            AI_Terminated = FAIEvent[0]
-            if AI_Terminated == True:break
-            AI_BufferHalfReady = FAIEvent[1]
-            AI_BufferFullReady = FAIEvent[2]
-            if AI_BufferHalfReady | AI_BufferFullReady:
-                overRun = DRV_FAITransfer(self.DriverHandle, self.pUserBuf, self.count)
-            if overRun != 0:
-                DRV_ClearOverrun(self.DriverHandle)
-                data = GetBufferData(self.pUserBuf, self.count)
-                data = SplitArray1DTo2D(data, 2)
-                # emit signal
-                self.emit(QtCore.SIGNAL("DaqData()"), data)
+        while self.working:
+            values = DRV_MAIVoltageIn(self.DriverHandle, self.numChan, self.startChan, self.gains)
+            # emit signal
+            signal_DAQ.emit(values)
+            self.msleep(100)
 
     def terminate(self):
-        DRV_FAITerminate(self.DriverHandle)
-        # Stop A/D conversion for high speed
-        DRV_FAIStop(self.DriverHandle)
         # Close device
         DRV_DeviceClose(self.DriverHandle)
 
+    def stop(self):
+        self.working = False
 
 
 if __name__ == "__main__":
