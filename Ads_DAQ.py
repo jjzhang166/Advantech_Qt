@@ -15,7 +15,7 @@ class DAQ_Task( QtCore.QThread):
         #QThread.__init__(self, parent)
         super(DAQ_Task, self).__init__(self, parent)
         self.DriverHandle = 0
-        self.usINTBuf = None # int buffer
+        self.usINTBuf = None # uint buffer
         self.pUserBuf = None # user buffer
         self.count = 200
         self.working = True
