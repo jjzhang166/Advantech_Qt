@@ -137,7 +137,7 @@ class MainWindow(QtGui.QWidget):
 
     def stop(self):
         if self.task_DAQ.isRunning():
-            self.task_DAQ.stop()
+            self.task_DAQ.terminate()
             self.task_DAQ.wait()
         
     def closeEvent(self, event):

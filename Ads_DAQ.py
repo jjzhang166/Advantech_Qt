@@ -35,6 +35,7 @@ class DAQ_Task( QtCore.QThread):
             super(DAQ_Task, self).start()
 
     def run(self):
+        print "run"
         while self.working:
             values = DRV_MAIVoltageIn(self.DriverHandle, self.numChan, self.startChan, self.gains)
             # emit signal
@@ -42,6 +43,7 @@ class DAQ_Task( QtCore.QThread):
             self.msleep(50)
 
     def terminate(self):
+        super(DAQ_Task, self).terminate()
         # Close device
         DRV_DeviceClose(self.DriverHandle)
 
