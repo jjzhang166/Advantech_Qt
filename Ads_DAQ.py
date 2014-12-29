@@ -13,14 +13,12 @@ from Adsapi import *
 class DAQ_Task( QtCore.QThread):
     signal_DAQ = QtCore.pyqtSignal(list)
     def __init__(self, parent=None):
-        #QThread.__init__(self, parent)
-        super(DAQ_Task, self).__init__(self, parent)
+        super(DAQ_Task, self).__init__(parent)
         self.DriverHandle = 0
         self.working = False
 
     def __del__(self):
         self.working = False
-        self.wait()
 
     def start(self, DeviceNum=0, startChan=0, numChan=2, gains=None):
         self.startChan = startChan
@@ -34,13 +32,14 @@ class DAQ_Task( QtCore.QThread):
             self.quit()
         else:
             self.working = True
+            super(DAQ_Task, self).start()
 
     def run(self):
         while self.working:
             values = DRV_MAIVoltageIn(self.DriverHandle, self.numChan, self.startChan, self.gains)
             # emit signal
-            signal_DAQ.emit(values)
-            self.msleep(100)
+            self.signal_DAQ.emit(values)
+            self.msleep(50)
 
     def terminate(self):
         # Close device
@@ -48,6 +47,7 @@ class DAQ_Task( QtCore.QThread):
 
     def stop(self):
         self.working = False
+        DRV_DeviceClose(self.DriverHandle)
 
 
 if __name__ == "__main__":
