@@ -43,6 +43,11 @@ class Chart(Qwt.QwtPlot):
         # insert a few curves
         self.curveA = Qwt.QwtPlotCurve(u'curveA')
         self.curveA.setPen(Qt.QPen(Qt.Qt.red))
+        self.curveA.setStyle(Qwt.QwtPlotCurve.Lines)
+        self.curveA.setSymbol(Qwt.QwtSymbol(Qwt.QwtSymbol.Ellipse,
+                                            Qt.Qt.yellow,
+                                            QtGui.QPen(Qt.Qt.blue),
+                                            Qt.QSize(5, 5) ))
         self.curveA.attach(self)
 
         self.curveB = Qwt.QwtPlotCurve(u'curveB')
@@ -142,7 +147,7 @@ class MainWindow(QtGui.QWidget):
         
     def closeEvent(self, event):
         if self.task_DAQ.isRunning():
-            self.stop()
+            self.task_DAQ.stop()
         self.close()
 
 

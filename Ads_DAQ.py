@@ -50,6 +50,7 @@ class DAQ_Task( QtCore.QThread):
     def stop(self):
         self.working = False
         DRV_DeviceClose(self.DriverHandle)
+        self.wait()
 
 
 if __name__ == "__main__":
