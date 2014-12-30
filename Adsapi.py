@@ -488,7 +488,7 @@ def DRV_FAIDmaStart(DriverHandle, SampleRate, chan, gain, buf, count, TrigSrc=0)
 
 def DRV_FAIDmaScanStart(DriverHandle, SampleRate, NumChans, StartChan, buf, count, GainList=None, TrigSrc=0):
     '''
-    Description:DMA多通道
+    Description:DMA MultiChannel
     Paramaters:
     '''
     PT_FAIDmaScanStart = tagPT_FAIDmaScanStart()
@@ -723,7 +723,7 @@ def DRV_FDIStop(DriverHandle):
 def DRV_FDICheck(DriverHandle):
     pass
 
-#------------------Digital Onput Functions(software triggering)-------------------#
+#------------------Digital Output Functions(software triggering)-------------------#
 def AdxDioGetCurrentDoPortsState(DriverHandle, dwPortStart, dwPortCount):
     '''
     未测--pBuffer的设置有问题
